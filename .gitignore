@@ -37,8 +37,9 @@ backend/.env
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/*
+/build/**
 !/build/web/
+!/build/web/**
 /coverage/
 
 # Symbolication related

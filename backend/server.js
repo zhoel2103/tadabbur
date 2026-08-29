@@ -13,7 +13,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const HADITH_API_KEY = process.env.HADITH_API_KEY;
 
 // Health check endpoint
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     message: 'Quran Chat AI Backend is running successfully!',

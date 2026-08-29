@@ -121,7 +121,7 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
                                 onPressed: () {
                                   if (_explanation != null) {
                                     final shareText = 'Penjelasan Al-Qur\'an Ayat ${widget.verseKey} (via AI & Tafsir Ibnu Katsir):\n\n$_explanation\n\n- Dibagikan dari Tadabbur Qur\'an';
-                                    SharePlus.instance.share(shareText);
+                                    Share.share(shareText);
                                   }
                                 },
                                 icon: const Icon(Icons.share, color: Colors.teal),
