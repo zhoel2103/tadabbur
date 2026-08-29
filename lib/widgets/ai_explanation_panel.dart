@@ -60,7 +60,7 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'AI Penjelasan - Ayat ${widget.verseKey}',
+                'Tafsir - Ayat ${widget.verseKey}',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
               ),
               IconButton(

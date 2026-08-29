@@ -19,6 +19,13 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
   final List<Map<String, String>> _chatHistory = [];
   bool _isChatting = false;
 
+  final List<String> _quickSuggestions = [
+    'Tadabbur tematik surah asy-syahr',
+    'Tadabbur tematik surah al-Baqarah ayat 1-5',
+    'Apa hikmah dari Kisah ashabul Kahfi',
+    'Bagaimana konsep shalat khusyuk',
+  ];
+
   Future<void> _sendChatMessage() async {
     final text = _chatController.text.trim();
     if (text.isEmpty) return;
@@ -121,15 +128,53 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
           // Content
           Expanded(
             child: _chatHistory.isEmpty
-                ? const Center(
+                ? SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
+                        const SizedBox(height: 24),
+                        Icon(Icons.auto_awesome, size: 44, color: Colors.teal.shade300),
+                        const SizedBox(height: 12),
+                        const Text(
                           'Tanyakan apa saja seputar Al-Qur\'an atau Islam...',
-                          style: TextStyle(color: Colors.grey),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        const SizedBox(height: 24),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Saran Pertanyaan / Tadabbur:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _quickSuggestions.map((suggestion) {
+                              return ActionChip(
+                                avatar: const Icon(Icons.psychology_alt, size: 16, color: Colors.teal),
+                                label: Text(
+                                  suggestion,
+                                  style: const TextStyle(fontSize: 12, color: Colors.teal),
+                                ),
+                                backgroundColor: Colors.teal.shade50,
+                                side: BorderSide(color: Colors.teal.shade200, width: 0.8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                onPressed: () {
+                                  _chatController.text = suggestion;
+                                  _sendChatMessage();
+                                },
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ],
                     ),
