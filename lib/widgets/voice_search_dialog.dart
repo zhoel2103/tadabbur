@@ -5,10 +5,6 @@ import '../services/ai_api_service.dart';
 import '../services/quran_api_service.dart';
 import '../screens/surah_screen.dart';
 
-// Conditionally import dart:js for Web platform
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
-
 class VoiceSearchDialog extends StatefulWidget {
   const VoiceSearchDialog({super.key});
 

@@ -22,7 +22,6 @@ class SurahScreen extends StatefulWidget {
 class _SurahScreenState extends State<SurahScreen> {
   final QuranApiService _apiService = QuranApiService();
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final LocalStorageService _storageService = LocalStorageService();
   
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _targetVerseKey = GlobalKey();
