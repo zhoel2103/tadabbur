@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Tadabbur Qur'an">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Tadabbur Qur'an</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script>
+    let recognition = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    window.startQuranSpeechRecognition = function(lang, onResult, onError, onEnd) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        if (onError) onError("Browser tidak mendukung Speech Recognition API.");
+        return false;
+      }
+
+      try {
+        if (recognition) {
+          try { recognition.abort(); } catch(e) {}
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = lang || 'ar-SA'; // default Arabic or id-ID
+
+        recognition.onresult = function(event) {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (onResult && transcript.trim().length > 0) {
+            onResult(transcript);
+          }
+        };
+
+        recognition.onerror = function(event) {
+          console.warn("Speech recognition error:", event.error);
+          if (onError) onError(event.error);
+        };
+
+        recognition.onend = function() {
+          if (onEnd) onEnd();
+        };
+
+        recognition.start();
+        return true;
+      } catch (err) {
+        console.error("Failed to start speech recognition:", err);
+        if (onError) onError(err.toString());
+        return false;
+      }
+    };
+
+    window.stopQuranSpeechRecognition = function() {
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+    };
+
+    window.startQuranAudioRecording = function(onSuccess, onError) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (onError) onError("Mikrofon tidak didukung di browser ini.");
+        return;
+      }
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          audioChunks = [];
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = function(e) {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+          mediaRecorder.onstop = function() {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = function() {
+              const base64data = reader.result.split(',')[1];
+              if (onSuccess) onSuccess(base64data, 'audio/webm');
+            };
+            // Stop tracks
+            stream.getTracks().forEach(track => track.stop());
+          };
+          mediaRecorder.start();
+        })
+        .catch(function(err) {
+          if (onError) onError("Izin mikrofon ditolak atau tidak tersedia: " + err.message);
+        });
+    };
+
+    window.recordAudioViaFileInput = function(onSuccess, onError) {
+      let fileInput = document.getElementById('quran-audio-file-input');
+      if (!fileInput) {
+        fileInput = document.createElement('input');
+        fileInput.id = 'quran-audio-file-input';
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*';
+        fileInput.capture = 'microphone';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+      }
+
+      fileInput.value = '';
+      fileInput.onchange = function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const base64 = evt.target.result.split(',')[1];
+          if (onSuccess) onSuccess(base64, file.type || 'audio/mp3');
+        };
+        reader.onerror = function(err) {
+          if (onError) onError("Gagal membaca file rekaman suara: " + err);
+        };
+        reader.readAsDataURL(file);
+      };
+
+      fileInput.click();
+    };
+
+    window.stopQuranAudioRecording = function() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    };
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

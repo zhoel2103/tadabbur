@@ -1,0 +1,17 @@
+{
+  "name": "quran-chat",
+  "version": "1.0.0",
+  "description": "Quran Chat - AI-Powered Quran Study App",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "echo 'Frontend pre-built in build/web'"
+  },
+  "dependencies": {
+    "@google/genai": "^2.19.0",
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
