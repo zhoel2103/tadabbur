@@ -12,6 +12,27 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const HADITH_API_KEY = process.env.HADITH_API_KEY;
 
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Quran Chat AI Backend is running successfully!',
+    endpoints: [
+      'POST /api/ai/explain',
+      'POST /api/ai/chat',
+      'POST /api/ai/global-chat',
+      'POST /api/ai/voice-search'
+    ]
+  });
+});
+
+app.get('/api', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Quran Chat AI API is active'
+  });
+});
+
 // Pseudo-MCP Tool: Fetch Tafsir
 async function getTafsir(verseKey) {
   try {
