@@ -10,7 +10,7 @@ class AiApiService {
         return '$origin/api/ai';
       }
     }
-    return 'http://192.168.1.2:3000/api/ai';
+    return 'https://backend-self-iota-j3vmrr7vly.vercel.app/api/ai';
   }
 
   Future<Map<String, dynamic>> explainVerse(String verseKey) async {
