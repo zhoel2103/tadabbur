@@ -3,7 +3,6 @@ import 'package:just_audio/just_audio.dart';
 import '../models/surah.dart';
 import '../models/verse.dart';
 import '../services/quran_api_service.dart';
-import '../services/local_storage_service.dart';
 import '../widgets/ai_explanation_panel.dart';
 import '../widgets/journal_panel.dart';
 import '../widgets/collection_bottom_sheet.dart';

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/ai_api_service.dart';
 import '../services/quran_api_service.dart';
 import '../screens/surah_screen.dart';
+import '../utils/web_audio_helper.dart' as web_audio;
 
 class VoiceSearchDialog extends StatefulWidget {
   const VoiceSearchDialog({super.key});
@@ -23,9 +24,6 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
   String? _errorMessage;
   String _listeningStatus = 'Pilih metode input suara atau ketik lafal ayat';
 
-  late AnimationController _animController;
-  late Animation<double> _scaleAnimation;
-
   final List<String> _quickSuggestions = [
     'Alhamdulillahi rabbil \'alamin',
     'Inna a\'thoynakal kautsar',
@@ -37,19 +35,11 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.28).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
-    );
   }
 
   @override
   void dispose() {
     _stopListening();
-    _animController.dispose();
     _queryController.dispose();
     super.dispose();
   }
@@ -64,36 +54,34 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
 
     setState(() {
       _isLoading = true;
-      _isListening = false;
       _errorMessage = null;
       _searchResult = null;
     });
 
     try {
-      final result = await _aiService.voiceSearch(queryText: query.trim());
+      final result = await _aiService.voiceSearch(queryText: query);
       setState(() {
         _searchResult = result;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Gagal memproses pencarian: $e';
+        _errorMessage = 'Gagal memproses pencarian ayat: $e';
         _isLoading = false;
       });
     }
   }
 
-  Future<void> _performAudioSearch(String audioBase64, String mimeType) async {
+  Future<void> _performAudioSearch(String base64Data, String mimeType) async {
     setState(() {
       _isLoading = true;
-      _isListening = false;
       _errorMessage = null;
       _searchResult = null;
     });
 
     try {
       final result = await _aiService.voiceSearch(
-        audioBase64: audioBase64,
+        audioBase64: base64Data,
         mimeType: mimeType,
       );
       setState(() {
@@ -111,7 +99,7 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
   void _recordViaNativeMic() {
     if (kIsWeb) {
       try {
-        js.context.callMethod('recordAudioViaFileInput', [
+        web_audio.recordAudioViaFileInput(
           (String base64Data, String mimeType) {
             _performAudioSearch(base64Data, mimeType);
           },
@@ -119,8 +107,8 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
             setState(() {
               _errorMessage = error;
             });
-          }
-        ]);
+          },
+        );
       } catch (e) {
         setState(() {
           _errorMessage = 'Gagal membuka perekam suara: $e';
@@ -139,7 +127,7 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
 
     if (kIsWeb) {
       try {
-        js.context.callMethod('startQuranSpeechRecognition', [
+        web_audio.startQuranSpeechRecognition(
           'ar-SA',
           (String transcript) {
             if (mounted) {
@@ -168,8 +156,8 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
                 _performSearch(_queryController.text);
               }
             }
-          }
-        ]);
+          },
+        );
       } catch (e) {
         setState(() {
           _isListening = false;
@@ -181,9 +169,7 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
 
   void _stopListening() {
     if (kIsWeb) {
-      try {
-        js.context.callMethod('stopQuranSpeechRecognition');
-      } catch (_) {}
+      web_audio.stopQuranSpeechRecognition();
     }
     setState(() {
       _isListening = false;
