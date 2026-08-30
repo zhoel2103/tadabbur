@@ -234,7 +234,14 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                                     constraints: const BoxConstraints(),
                                     onPressed: () async {
                                       try {
-                                        await _storageService.saveAiAnswer('Global Chat', msg['text']!);
+                                        String question = 'Tanya Jawab AI';
+                                        for (int i = index - 1; i >= 0; i--) {
+                                          if (_chatHistory[i]['role'] == 'user') {
+                                            question = _chatHistory[i]['text'] ?? 'Tanya Jawab AI';
+                                            break;
+                                          }
+                                        }
+                                        await _storageService.saveAiAnswer(question, msg['text']!, question: question);
                                         _showMessage('Jawaban disimpan ke riwayat!');
                                       } catch (e) {
                                         _showMessage('Gagal menyimpan.');

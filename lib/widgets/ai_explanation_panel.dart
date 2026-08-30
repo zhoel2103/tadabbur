@@ -107,7 +107,11 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
                               OutlinedButton.icon(
                                 onPressed: () async {
                                   if (_explanation != null) {
-                                    await LocalStorageService().saveAiAnswer(widget.verseKey, _explanation!);
+                                    await LocalStorageService().saveAiAnswer(
+                                      'Ayat ${widget.verseKey}',
+                                      _explanation!,
+                                      question: 'Tafsir Ayat ${widget.verseKey}',
+                                    );
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Penjelasan disimpan ke koleksi ! ✅')),

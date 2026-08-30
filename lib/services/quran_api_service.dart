@@ -5,17 +5,33 @@ import '../models/verse.dart';
 
 class QuranApiService {
   static const String baseUrl = 'https://api.quran.com/api/v4';
+  static List<Surah>? _cachedSurahs;
 
   // Fetch list of all surahs
   Future<List<Surah>> getSurahs() async {
+    if (_cachedSurahs != null && _cachedSurahs!.isNotEmpty) {
+      return _cachedSurahs!;
+    }
+
     final response = await http.get(Uri.parse('$baseUrl/chapters?language=id'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       final List<dynamic> chapters = data['chapters'];
-      return chapters.map((json) => Surah.fromJson(json)).toList();
+      _cachedSurahs = chapters.map((json) => Surah.fromJson(json)).toList();
+      return _cachedSurahs!;
     } else {
       throw Exception('Failed to load surahs');
+    }
+  }
+
+  // Get single surah by its id (1 to 114)
+  Future<Surah?> getSurahById(int id) async {
+    final surahs = await getSurahs();
+    try {
+      return surahs.firstWhere((s) => s.id == id);
+    } catch (_) {
+      return null;
     }
   }
 

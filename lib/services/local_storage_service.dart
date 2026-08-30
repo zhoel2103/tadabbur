@@ -28,6 +28,14 @@ class LocalStorageService {
     }
   }
 
+  Future<void> deleteCollection(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    final collections = await getCollections();
+    collections.remove(name);
+    await prefs.setStringList('collections_list', collections);
+    await prefs.remove('collection_$name');
+  }
+
   Future<void> addVerseToCollection(String collectionName, String verseKey) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'collection_$collectionName';
@@ -38,16 +46,26 @@ class LocalStorageService {
     }
   }
 
+  Future<void> removeVerseFromCollection(String collectionName, String verseKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'collection_$collectionName';
+    final List<String> verses = prefs.getStringList(key) ?? [];
+    verses.remove(verseKey);
+    await prefs.setStringList(key, verses);
+  }
+
   Future<List<String>> getVersesInCollection(String collectionName) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('collection_$collectionName') ?? [];
   }
 
   // AI SAVED ANSWERS
-  Future<void> saveAiAnswer(String verseKey, String explanation) async {
+  Future<void> saveAiAnswer(String topic, String explanation, {String? question}) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> answers = prefs.getStringList('saved_ai_answers_v2') ?? [];
     
+    final cleanQuestion = (question ?? topic).trim();
+
     bool exists = false;
     for (var a in answers) {
       if (a.contains(explanation)) exists = true;
@@ -55,12 +73,32 @@ class LocalStorageService {
     
     if (!exists) {
       final Map<String, dynamic> data = {
-        'verseKey': verseKey,
+        'verseKey': topic,
+        'question': cleanQuestion,
         'explanation': explanation,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
       };
       answers.add(json.encode(data));
       await prefs.setStringList('saved_ai_answers_v2', answers);
     }
+  }
+
+  Future<void> deleteAiAnswer(String questionOrTopic, String explanation) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> answers = prefs.getStringList('saved_ai_answers_v2') ?? [];
+    
+    answers.removeWhere((item) {
+      try {
+        final data = json.decode(item);
+        final exp = data['explanation'] as String?;
+        final q = (data['question'] ?? data['verseKey']) as String?;
+        return exp == explanation || (q == questionOrTopic && exp == explanation);
+      } catch (_) {
+        return false;
+      }
+    });
+
+    await prefs.setStringList('saved_ai_answers_v2', answers);
   }
   
   Future<Map<String, List<String>>> getSavedAiAnswersGrouped() async {
@@ -71,13 +109,20 @@ class LocalStorageService {
     for (String str in answers) {
       try {
         final data = json.decode(str);
-        final verseKey = data['verseKey'] as String;
+        // Use question if available, otherwise fall back to verseKey
+        String groupKey = (data['question'] as String?)?.trim() ?? (data['verseKey'] as String?)?.trim() ?? 'Tanya Jawab AI';
+        
+        // Normalize 'Global Chat' to 'Tanya Jawab AI' if from legacy records
+        if (groupKey == 'Global Chat') {
+          groupKey = 'Tanya Jawab AI';
+        }
+
         final explanation = data['explanation'] as String;
         
-        if (!grouped.containsKey(verseKey)) {
-          grouped[verseKey] = [];
+        if (!grouped.containsKey(groupKey)) {
+          grouped[groupKey] = [];
         }
-        grouped[verseKey]!.add(explanation);
+        grouped[groupKey]!.add(explanation);
       } catch (e) {
         // ignore parsing errors from old formats if any
       }
