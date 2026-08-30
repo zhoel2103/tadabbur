@@ -1,7 +1,7 @@
 {
-  "name": "quran-chat",
+  "name": "tadabbur",
   "version": "1.0.0",
-  "description": "Quran Chat - AI-Powered Quran Study App",
+  "description": "Tadabbur - AI-Powered Quran Study App",
   "main": "api/index.js",
   "scripts": {
     "start": "node backend/server.js",

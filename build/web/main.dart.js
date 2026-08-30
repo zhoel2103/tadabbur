@@ -93439,7 +93439,7 @@ return s},
 $S:590}
 A.Q_.prototype={
 K(a){var s=A.ahp(a,t.eC)
-return new A.Ca(B.I1,"Tadabbur Qur'an",s.gaqw(),s.gXY(),s.gaxB(),!1,null)}}
+return new A.Ca(B.I1,"Tadabbur",s.gaqw(),s.gXY(),s.gaxB(),!1,null)}}
 A.hG.prototype={}
 A.l1.prototype={}
 A.aoi.prototype={

@@ -21,7 +21,7 @@ class QuranChatApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: "Tadabbur Qur'an",
+      title: "Tadabbur",
       debugShowCheckedModeBanner: false,
       theme: themeProvider.currentTheme,
       darkTheme: themeProvider.darkTheme,
