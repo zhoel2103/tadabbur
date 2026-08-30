@@ -93,12 +93,17 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,13 +112,13 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.auto_awesome, color: Colors.teal),
-                  SizedBox(width: 8),
+                  Icon(Icons.auto_awesome, color: primary),
+                  const SizedBox(width: 8),
                   Text(
-                    'Asisten AI Al-Qur\'an',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                    'Asisten AI',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primary),
                   ),
                 ],
               ),
@@ -123,7 +128,7 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
               )
             ],
           ),
-          const Divider(),
+          Divider(color: theme.dividerColor),
           
           // Content
           Expanded(
@@ -133,22 +138,22 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 24),
-                        Icon(Icons.auto_awesome, size: 44, color: Colors.teal.shade300),
+                        Icon(Icons.auto_awesome, size: 44, color: primary.withValues(alpha: 0.6)),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'Tanyakan apa saja seputar Al-Qur\'an atau Islam...',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          style: TextStyle(color: onSurface.withValues(alpha: 0.6), fontSize: 14),
                         ),
                         const SizedBox(height: 24),
-                        const Align(
+                        Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Saran Pertanyaan / Tadabbur:',
+                            'Saran Pertanyaan :',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: Colors.teal,
+                              color: primary,
                             ),
                           ),
                         ),
@@ -160,13 +165,13 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                             runSpacing: 8,
                             children: _quickSuggestions.map((suggestion) {
                               return ActionChip(
-                                avatar: const Icon(Icons.psychology_alt, size: 16, color: Colors.teal),
+                                avatar: Icon(Icons.psychology_alt, size: 16, color: primary),
                                 label: Text(
                                   suggestion,
-                                  style: const TextStyle(fontSize: 12, color: Colors.teal),
+                                  style: TextStyle(fontSize: 12, color: primary),
                                 ),
-                                backgroundColor: Colors.teal.shade50,
-                                side: BorderSide(color: Colors.teal.shade200, width: 0.8),
+                                backgroundColor: primary.withValues(alpha: 0.08),
+                                side: BorderSide(color: primary.withValues(alpha: 0.3), width: 0.8),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 onPressed: () {
                                   _chatController.text = suggestion;
@@ -184,11 +189,11 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                     itemCount: _chatHistory.length + (_isChatting ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == _chatHistory.length && _isChatting) {
-                        return const Align(
+                        return Align(
                           alignment: Alignment.centerLeft,
                           child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
+                            padding: const EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(color: primary),
                           ),
                         );
                       }
@@ -204,24 +209,33 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                               margin: const EdgeInsets.only(bottom: 4),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: isUser ? Colors.teal.shade50 : Colors.grey.shade100,
+                                color: isUser
+                                    ? primary.withValues(alpha: 0.15)
+                                    : (isDark ? const Color(0xFF334155) : theme.dividerColor.withValues(alpha: 0.3)),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(msg['text']!),
+                              child: Text(
+                                msg['text']!,
+                                style: TextStyle(
+                                  color: onSurface,
+                                  fontSize: 14.5,
+                                  height: 1.4,
+                                ),
+                              ),
                             ),
                             if (!isUser)
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.bookmark_border, size: 20, color: Colors.teal),
+                                    icon: Icon(Icons.bookmark_border, size: 20, color: primary),
                                     tooltip: 'Simpan',
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),
                                     onPressed: () async {
                                       try {
                                         await _storageService.saveAiAnswer('Global Chat', msg['text']!);
-                                        _showMessage('Jawaban AI disimpan ke riwayat!');
+                                        _showMessage('Jawaban disimpan ke riwayat!');
                                       } catch (e) {
                                         _showMessage('Gagal menyimpan.');
                                       }
@@ -229,7 +243,7 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                                   ),
                                   const SizedBox(width: 16),
                                   IconButton(
-                                    icon: const Icon(Icons.share, size: 20, color: Colors.teal),
+                                    icon: Icon(Icons.share, size: 20, color: primary),
                                     tooltip: 'Bagikan',
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),
@@ -260,8 +274,10 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                 Expanded(
                   child: TextField(
                     controller: _chatController,
+                    style: TextStyle(color: onSurface),
                     decoration: InputDecoration(
                       hintText: 'Ketik pesan Anda...',
+                      hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.5)),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
@@ -270,7 +286,7 @@ class _GlobalAiChatSheetState extends State<GlobalAiChatSheet> {
                 ),
                 const SizedBox(width: 8),
                 CircleAvatar(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: primary,
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white, size: 20),
                     onPressed: _isChatting ? null : _sendChatMessage,

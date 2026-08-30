@@ -218,6 +218,10 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+
     return Container(
       padding: EdgeInsets.only(
         top: 20,
@@ -225,9 +229,9 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
         right: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -243,18 +247,18 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.teal.shade50,
+                        color: primary.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.mic, color: Colors.teal, size: 24),
+                      child: Icon(Icons.mic, color: primary, size: 24),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Pencarian Suara Ayat',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.teal,
+                        color: primary,
                       ),
                     ),
                   ],
@@ -266,19 +270,20 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Lafalkan potongan ayat melalui rekaman audio mikrofon atau ketik kata kuncinya.',
-              style: TextStyle(color: Colors.grey, fontSize: 13),
+              style: TextStyle(color: onSurface.withValues(alpha: 0.6), fontSize: 13),
             ),
-            const Divider(height: 24),
+            Divider(height: 24, color: theme.dividerColor),
 
             // Search input field
             TextField(
               controller: _queryController,
+              style: TextStyle(color: onSurface),
               decoration: InputDecoration(
                 hintText: 'Lafal ayat (mis: Qul huwallahu ahad / ar-Rahman)',
-                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.4), fontSize: 14),
+                prefixIcon: Icon(Icons.search, color: primary),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -400,7 +405,7 @@ class _VoiceSearchDialogState extends State<VoiceSearchDialog> with SingleTicker
                     const CircularProgressIndicator(color: Colors.teal),
                     const SizedBox(height: 16),
                     Text(
-                      'AI sedang menganalisis & mencocokkan ayat...',
+                      'sedang menganalisis & mencocokkan ayat...',
                       style: TextStyle(color: Colors.teal.shade800, fontWeight: FontWeight.w600),
                     ),
                   ],

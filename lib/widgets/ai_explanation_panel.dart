@@ -41,16 +41,18 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,7 +63,7 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
             children: [
               Text(
                 'Tafsir - Ayat ${widget.verseKey}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primary),
               ),
               IconButton(
                 icon: const Icon(Icons.close),
@@ -69,33 +71,36 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
               )
             ],
           ),
-          const Divider(),
+          Divider(color: theme.dividerColor),
           
           // Content
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(color: primary))
                 : _error != null
                     ? Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red)))
                     : ListView(
                         children: [
-                          const Text('Penjelasan Utama:', style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
-                          Text(_explanation ?? '', style: const TextStyle(height: 1.5)),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.info_outline, size: 16, color: Colors.orange),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text('Sumber: $_source', style: const TextStyle(fontSize: 12, color: Colors.orange))),
-                              ],
+                          Text(
+                            _explanation ?? '',
+                            style: TextStyle(
+                              height: 1.6,
+                              fontSize: 15,
+                              color: onSurface.withValues(alpha: 0.95),
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          // Action buttons
+                          const SizedBox(height: 12),
+                          if (_source != null)
+                            Text(
+                              'Sumber: $_source',
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                color: onSurface.withValues(alpha: 0.6),
+                                fontSize: 12,
+                              ),
+                            ),
+                          const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -105,29 +110,29 @@ class _AiExplanationPanelState extends State<AiExplanationPanel> {
                                     await LocalStorageService().saveAiAnswer(widget.verseKey, _explanation!);
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Penjelasan disimpan ke koleksi AI! ✅')),
+                                        const SnackBar(content: Text('Penjelasan disimpan ke koleksi ! ✅')),
                                       );
                                     }
                                   }
                                 },
-                                icon: const Icon(Icons.bookmark_border, color: Colors.teal),
-                                label: const Text('Simpan', style: TextStyle(color: Colors.teal)),
+                                icon: Icon(Icons.bookmark_add, color: primary),
+                                label: Text('Simpan', style: TextStyle(color: primary)),
                                 style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Colors.teal),
+                                  side: BorderSide(color: primary),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 ),
                               ),
                               OutlinedButton.icon(
                                 onPressed: () {
                                   if (_explanation != null) {
-                                    final shareText = 'Penjelasan Al-Qur\'an Ayat ${widget.verseKey} (via AI & Tafsir Ibnu Katsir):\n\n$_explanation\n\n- Dibagikan dari Tadabbur Qur\'an';
+                                    final shareText = 'Penjelasan Al-Qur\'an Ayat ${widget.verseKey} (via Tafsir Ibnu Katsir):\n\n$_explanation\n\n- Dibagikan dari Tadabbur Qur\'an';
                                     Share.share(shareText);
                                   }
                                 },
-                                icon: const Icon(Icons.share, color: Colors.teal),
-                                label: const Text('Bagikan', style: TextStyle(color: Colors.teal)),
+                                icon: Icon(Icons.share, color: primary),
+                                label: Text('Bagikan', style: TextStyle(color: primary)),
                                 style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Colors.teal),
+                                  side: BorderSide(color: primary),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 ),
                               ),

@@ -66,11 +66,11 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Penjelasan AI Tersimpan'),
+          title: const Text('Penjelasan Tersimpan'),
           content: SizedBox(
             width: double.maxFinite,
             child: groupedAnswers.isEmpty
-                ? const Text('Belum ada penjelasan AI yang disimpan.')
+                ? const Text('Belum ada yang disimpan.')
                 : ListView.builder(
                     shrinkWrap: true,
                     itemCount: groupedAnswers.length,
@@ -104,31 +104,34 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Koleksi Ayat'),
-        backgroundColor: Colors.teal,
       ),
-        body: ListView.builder(
-              itemCount: _collections.length + 1,
-              itemBuilder: (context, index) {
-                if (index == _collections.length) {
-                  return ListTile(
-                    leading: const Icon(Icons.auto_awesome, color: Colors.purple),
-                    title: const Text('Penjelasan AI Tersimpan', style: TextStyle(fontWeight: FontWeight.bold)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _showAiAnswers,
-                  );
-                }
-                final collection = _collections[index];
-                return ListTile(
-                  leading: const Icon(Icons.folder, color: Colors.amber),
-                  title: Text(collection, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showVerses(collection),
-                );
-              },
-            ),
+      body: ListView.separated(
+        itemCount: _collections.length + 1,
+        separatorBuilder: (context, index) => Divider(height: 1, color: theme.dividerColor),
+        itemBuilder: (context, index) {
+          if (index == _collections.length) {
+            return ListTile(
+              leading: Icon(Icons.auto_awesome, color: primary),
+              title: const Text('Penjelasan Tersimpan', style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _showAiAnswers,
+            );
+          }
+          final collection = _collections[index];
+          return ListTile(
+            leading: const Icon(Icons.folder, color: Colors.amber),
+            title: Text(collection, style: const TextStyle(fontWeight: FontWeight.bold)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showVerses(collection),
+          );
+        },
+      ),
     );
   }
 }

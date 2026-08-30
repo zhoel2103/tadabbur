@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/surah.dart';
+import '../providers/theme_provider.dart';
 import '../services/quran_api_service.dart';
+import '../widgets/theme_selector_sheet.dart';
 import 'surah_screen.dart';
 import 'collections_screen.dart';
 import '../widgets/global_ai_chat_sheet.dart';
@@ -34,12 +37,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    IconData themeIcon;
+    switch (themeProvider.currentMode) {
+      case AppThemeMode.dark:
+        themeIcon = Icons.nightlight_round;
+        break;
+      case AppThemeMode.sepia:
+        themeIcon = Icons.menu_book_rounded;
+        break;
+      case AppThemeMode.light:
+        themeIcon = Icons.wb_sunny_rounded;
+        break;
+      case AppThemeMode.system:
+        themeIcon = Icons.brightness_auto_rounded;
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tadabbur Qur'an"),
         elevation: 0,
-        backgroundColor: Colors.teal,
         actions: [
+          IconButton(
+            icon: Icon(themeIcon),
+            tooltip: 'Mode Baca & Tema',
+            onPressed: () => ThemeSelectorSheet.show(context),
+          ),
           IconButton(
             icon: const Icon(Icons.mic),
             tooltip: 'Pencarian Suara',
@@ -91,14 +116,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: Colors.teal.withValues(alpha: 0.1),
+                            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                             child: Text(
                               surah.id.toString(),
-                              style: const TextStyle(color: Colors.teal),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          title: Text(surah.nameSimple),
-                          subtitle: Text('${surah.translatedName} • ${surah.versesCount} ayat'),
+                          title: Text(
+                            surah.nameSimple,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            '${surah.translatedName} • ${surah.versesCount} ayat',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                            ),
+                          ),
                           trailing: Text(
                             surah.nameArabic,
                             style: const TextStyle(
@@ -115,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                         ),
-                        const Divider(height: 1),
+                        Divider(height: 1, color: Theme.of(context).dividerColor),
                       ],
                     );
                   },
@@ -137,20 +173,26 @@ class VoiceSearchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade700, Colors.teal.shade500],
+            colors: [
+              primary,
+              primary.withValues(alpha: 0.82),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.teal.withValues(alpha: 0.3),
+              color: primary.withValues(alpha: 0.25),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -172,7 +214,7 @@ class VoiceSearchCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Pencarian Suara Ayat',
+                    'Pencarian Suara',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -191,15 +233,15 @@ class VoiceSearchCard extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
+              child: Text(
                 'Mulai',
                 style: TextStyle(
-                  color: Colors.teal,
+                  color: primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -212,12 +254,16 @@ class VoiceSearchCard extends StatelessWidget {
   }
 }
 
-
 class GlobalAiChatCard extends StatelessWidget {
   const GlobalAiChatCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final primaryColor = theme.colorScheme.primary;
+    final textColor = theme.colorScheme.onSurface;
+
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -230,12 +276,12 @@ class GlobalAiChatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.teal.shade200, width: 2),
+          border: Border.all(color: primaryColor.withValues(alpha: 0.3), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.teal.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -246,36 +292,36 @@ class GlobalAiChatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.teal.shade50,
+                color: primaryColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome, color: Colors.teal, size: 32),
+              child: Icon(Icons.auto_awesome, color: primaryColor, size: 30),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Tanya Asisten AI',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal,
+                      color: primaryColor,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Tanyakan apapun seputar Al-Qur''an dan Islam.',
+                    'Tanyakan apapun seputar Al-Qur\'an dan Islam.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.black54,
+                      color: textColor.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.teal),
+            Icon(Icons.chevron_right, color: primaryColor),
           ],
         ),
       ),

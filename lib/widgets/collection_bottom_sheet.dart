@@ -49,7 +49,14 @@ class _CollectionBottomSheetState extends State<CollectionBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 16,
@@ -60,9 +67,9 @@ class _CollectionBottomSheetState extends State<CollectionBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Simpan ke Koleksi',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -80,12 +87,12 @@ class _CollectionBottomSheetState extends State<CollectionBottomSheet> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: _createNewCollection,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: primary, foregroundColor: Colors.white),
                 child: const Text('Buat'),
               ),
             ],
           ),
-          const Divider(height: 32),
+          Divider(height: 32, color: theme.dividerColor),
           if (_collections.isEmpty)
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -99,7 +106,7 @@ class _CollectionBottomSheetState extends State<CollectionBottomSheet> {
               itemBuilder: (context, index) {
                 final collection = _collections[index];
                 return ListTile(
-                  leading: const Icon(Icons.folder, color: Colors.teal),
+                  leading: Icon(Icons.folder, color: primary),
                   title: Text(collection),
                   onTap: () => _addToCollection(collection),
                 );

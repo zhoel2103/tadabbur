@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import '../models/surah.dart';
 import '../models/verse.dart';
+import '../providers/theme_provider.dart';
 import '../services/quran_api_service.dart';
 import '../widgets/ai_explanation_panel.dart';
 import '../widgets/journal_panel.dart';
 import '../widgets/collection_bottom_sheet.dart';
+import '../widgets/theme_selector_sheet.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SurahScreen extends StatefulWidget {
@@ -222,13 +225,40 @@ class _SurahScreenState extends State<SurahScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+
+    IconData themeIcon;
+    switch (themeProvider.currentMode) {
+      case AppThemeMode.dark:
+        themeIcon = Icons.nightlight_round;
+        break;
+      case AppThemeMode.sepia:
+        themeIcon = Icons.menu_book_rounded;
+        break;
+      case AppThemeMode.light:
+        themeIcon = Icons.wb_sunny_rounded;
+        break;
+      case AppThemeMode.system:
+        themeIcon = Icons.brightness_auto_rounded;
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.surah.nameSimple),
-        backgroundColor: Colors.teal,
+        actions: [
+          IconButton(
+            icon: Icon(themeIcon),
+            tooltip: 'Mode Baca & Tema',
+            onPressed: () => ThemeSelectorSheet.show(context),
+          ),
+        ],
       ),
       body: _verses.isEmpty && _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+          ? Center(child: CircularProgressIndicator(color: primary))
           : _verses.isEmpty && _error != null
               ? Center(
                   child: Column(
@@ -249,22 +279,22 @@ class _SurahScreenState extends State<SurahScreen> {
                       controller: _scrollController,
                       padding: const EdgeInsets.all(16.0),
                       itemCount: _verses.length + (_minPageLoaded > 1 ? 1 : 0) + (_isLoading ? 1 : 0),
-                      separatorBuilder: (context, index) => const Divider(height: 32),
+                      separatorBuilder: (context, index) => Divider(height: 32, color: theme.dividerColor),
                       itemBuilder: (context, index) {
                         // Top item for loading previous verses if jumped to mid-surah
                         if (_minPageLoaded > 1 && index == 0) {
                           return Center(
                             child: _isLoadingPrev
-                                ? const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: CircularProgressIndicator(color: Colors.teal),
+                                ? Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: CircularProgressIndicator(color: primary),
                                   )
                                 : TextButton.icon(
                                     onPressed: _fetchPreviousVerses,
-                                    icon: const Icon(Icons.arrow_upward, color: Colors.teal),
+                                    icon: Icon(Icons.arrow_upward, color: primary),
                                     label: Text(
                                       'Muat Ayat Sebelumnya (Hal. ${_minPageLoaded - 1})',
-                                      style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                                      style: TextStyle(color: primary, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                           );
@@ -273,10 +303,10 @@ class _SurahScreenState extends State<SurahScreen> {
                         final verseIndex = _minPageLoaded > 1 ? index - 1 : index;
 
                         if (verseIndex >= _verses.length) {
-                          return const Center(
+                          return Center(
                             child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator(color: Colors.teal),
+                              padding: const EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(color: primary),
                             ),
                           );
                         }
@@ -290,7 +320,9 @@ class _SurahScreenState extends State<SurahScreen> {
                 padding: isTargetVerse ? const EdgeInsets.all(12) : EdgeInsets.zero,
                 decoration: isTargetVerse
                     ? BoxDecoration(
-                        color: Colors.amber.shade50.withValues(alpha: 0.75),
+                        color: themeProvider.isDark
+                            ? Colors.amber.shade900.withValues(alpha: 0.25)
+                            : Colors.amber.shade50.withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.amber.shade600, width: 2),
                       )
@@ -306,14 +338,16 @@ class _SurahScreenState extends State<SurahScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: isTargetVerse ? Colors.amber.shade800 : Colors.teal.withValues(alpha: 0.1),
+                                color: isTargetVerse
+                                    ? Colors.amber.shade800
+                                    : primary.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
                                 verse.verseKey,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: isTargetVerse ? Colors.white : Colors.teal,
+                                  color: isTargetVerse ? Colors.white : primary,
                                 ),
                               ),
                             ),
@@ -351,13 +385,13 @@ class _SurahScreenState extends State<SurahScreen> {
                             IconButton(
                               icon: Icon(
                                 isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                                color: Colors.teal,
+                                color: primary,
                                 size: 32,
                               ),
                               onPressed: () => _playAudio(verse.audioUrl, verseIndex),
                             ),
                           IconButton(
-                            icon: const Icon(Icons.edit_note, color: Colors.teal),
+                            icon: Icon(Icons.edit_note, color: primary),
                             tooltip: 'Jurnal',
                             onPressed: () {
                               showModalBottomSheet(
@@ -369,7 +403,7 @@ class _SurahScreenState extends State<SurahScreen> {
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.bookmark_border, color: Colors.teal),
+                            icon: Icon(Icons.bookmark_border, color: primary),
                             tooltip: 'Simpan ke Koleksi',
                             onPressed: () {
                               showModalBottomSheet(
@@ -396,7 +430,7 @@ class _SurahScreenState extends State<SurahScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Text(
                             word.text,
-                            style: GoogleFonts.amiri(fontSize: 28, color: Colors.teal),
+                            style: GoogleFonts.amiri(fontSize: 28, color: primary),
                           ),
                         );
                       }
@@ -406,7 +440,7 @@ class _SurahScreenState extends State<SurahScreen> {
                         triggerMode: TooltipTriggerMode.tap,
                         preferBelow: false,
                         decoration: BoxDecoration(
-                          color: Colors.teal.shade700,
+                          color: primary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         textStyle: const TextStyle(color: Colors.white, fontSize: 14),
@@ -417,6 +451,7 @@ class _SurahScreenState extends State<SurahScreen> {
                               style: GoogleFonts.amiri(
                                 fontSize: 28,
                                 height: 1.5,
+                                color: onSurface,
                               ),
                               textDirection: TextDirection.rtl,
                             ),
@@ -428,7 +463,11 @@ class _SurahScreenState extends State<SurahScreen> {
                   const SizedBox(height: 16),
                   Text(
                     verse.translation,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: onSurface.withValues(alpha: 0.9),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Align(
@@ -442,10 +481,10 @@ class _SurahScreenState extends State<SurahScreen> {
                           builder: (context) => AiExplanationPanel(verseKey: verse.verseKey),
                         );
                       },
-                      icon: const Icon(Icons.auto_awesome, color: Colors.teal),
-                      label: const Text('Tafsir Ibn-Katsir', style: TextStyle(color: Colors.teal)),
+                      icon: Icon(Icons.auto_awesome, color: primary),
+                      label: Text('Tafsir Ibn-Katsir', style: TextStyle(color: primary)),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.teal),
+                        side: BorderSide(color: primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),
                     ),

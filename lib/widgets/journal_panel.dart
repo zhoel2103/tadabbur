@@ -43,6 +43,10 @@ class _JournalPanelState extends State<JournalPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final onSurface = theme.colorScheme.onSurface;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.6,
       padding: EdgeInsets.only(
@@ -51,9 +55,9 @@ class _JournalPanelState extends State<JournalPanel> {
         right: 16,
         top: 16,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,7 +67,7 @@ class _JournalPanelState extends State<JournalPanel> {
             children: [
               Text(
                 'Jurnal Refleksi - Ayat ${widget.verseKey}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primary),
               ),
               IconButton(
                 icon: const Icon(Icons.close),
@@ -71,23 +75,25 @@ class _JournalPanelState extends State<JournalPanel> {
               )
             ],
           ),
-          const Divider(),
-          const Text(
+          Divider(color: theme.dividerColor),
+          Text(
             'Tulis refleksi, pelajaran, atau doa yang Anda dapatkan dari ayat ini...',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: onSurface.withValues(alpha: 0.6)),
           ),
           const SizedBox(height: 12),
           Expanded(
             child: TextField(
               controller: _controller,
+              style: TextStyle(color: onSurface),
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 hintText: 'Mulai menulis...',
+                hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.4)),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: theme.scaffoldBackgroundColor,
               ),
             ),
           ),
@@ -95,7 +101,7 @@ class _JournalPanelState extends State<JournalPanel> {
           ElevatedButton(
             onPressed: _isSaving ? null : _saveJournal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
